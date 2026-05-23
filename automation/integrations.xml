@@ -1,0 +1,29 @@
+<!--
+  integrations.xml
+  Path: /var/ossec/etc/ossec.conf  (paste inside the <ossec_config> block)
+  Wazuh outbound integrations: VirusTotal threat intel + Shuffle SOAR webhook.
+-->
+
+<!-- ============================================================
+     VirusTotal — File Hash Threat Intelligence Enrichment
+     Triggers on FIM rules: file added / modified / deleted
+     Returns malicious verdict → escalates to Alert Level 7
+     ============================================================ -->
+<integration>
+  <name>virustotal</name>
+  <api_key>d7e7ea972c1421d4f80278e20e73fffd4b5f290f6730173cd96bfcb156c96355</api_key>
+  <rule_id>554,550,553,552,551</rule_id>
+  <alert_format>json</alert_format>
+</integration>
+
+<!-- ============================================================
+     Shuffle SOAR — Automated Response Webhook
+     Fires on any alert level >= 10
+     Triggers playbook: Discord notify → OPNsense IP block
+     ============================================================ -->
+<integration>
+  <name>shuffle</name>
+  <hook_url>http://192.168.30.20:3001/api/v1/hooks/webhook_f6707071-777e-4cc9-9411-56dc31667108</hook_url>
+  <level>10</level>
+  <alert_format>json</alert_format>
+</integration>

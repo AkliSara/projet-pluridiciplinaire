@@ -1,0 +1,23 @@
+<!--
+  active_response.xml
+  Path: /var/ossec/etc/ossec.conf  (paste inside the <ossec_config> block)
+
+  Host-level containment: when brute force thresholds are crossed,
+  Wazuh commands the target agent to drop all traffic from the attacker IP
+  via the host's local firewall tables.
+
+  Timeout: 600s (10 minutes) — temporary block to avoid permanent
+  admin lockout from false-positive triggers.
+
+  Triggering rules:
+    5712  — SSH brute force attempt detected (native)
+    5763  — SSH login blocked by pam_tally (native)
+    100002 — Custom: 3+ failures in 60s from same IP
+-->
+<active-response>
+  <command>firewall-drop</command>
+  <location>defined-agent</location>
+  <agent_id>001</agent_id>
+  <rules_id>5712,5763,100002</rules_id>
+  <timeout>600</timeout>
+</active-response>

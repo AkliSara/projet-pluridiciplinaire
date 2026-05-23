@@ -1,0 +1,113 @@
+<!--
+  local_rules.xml
+  Path: /var/ossec/etc/rules/local_rules.xml
+  Custom Wazuh detection rules for the SOC/SIEM lab.
+  Add these inside your existing <group> blocks or append to the file.
+-->
+
+<!-- ============================================================
+     SSH Authentication Baseline
+     ============================================================ -->
+<group name="local,sshd,authentication_failed,">
+
+  <!-- Rule 100001: Baseline wrapper around native SSH failure rule (reference only) -->
+  <rule id="100001" level="5">
+    <if_sid>5716</if_sid>
+    <description>sshd: authentication failed (custom baseline rule)</description>
+    <group>authentication_failed,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+</group>
+
+<!-- ============================================================
+     SSH Brute Force Detection
+     ============================================================ -->
+<group name="ssh_brute_force,">
+
+  <!-- Rule 100002: 3+ failures from same IP within 60s → level 12 -->
+  <rule id="100002" level="12" frequency="3" timeframe="60">
+    <if_matched_sid>5710,5716</if_matched_sid>
+    <same_source_ip />
+    <description>SSH Brute Force CRITICAL: 3+ failed attempts in 60 seconds from same IP</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>brute_force,</group>
+  </rule>
+
+  <!-- Rule 100003: Successful login immediately after brute force from same IP → level 15 -->
+  <rule id="100003" level="15" timeframe="120">
+    <if_matched_sid>100002</if_matched_sid>
+    <if_sid>5715</if_sid>
+    <same_source_ip />
+    <description>CRITICAL: SSH login SUCCESS after brute force from same IP — initial access confirmed</description>
+    <mitre>
+      <id>T1110.001</id>
+    </mitre>
+    <group>brute_force,authentication_success,</group>
+  </rule>
+
+</group>
+
+<!-- ============================================================
+     Privilege Escalation Detection
+     ============================================================ -->
+<group name="privilege_escalation,">
+
+  <!-- Rule 100004: sudo to root executed -->
+  <rule id="100004" level="10">
+    <if_sid>5402</if_sid>
+    <description>Privilege Escalation: Successful sudo to ROOT executed</description>
+    <mitre>
+      <id>T1548.003</id>
+    </mitre>
+    <group>privilege_escalation,</group>
+  </rule>
+
+</group>
+
+<!-- ============================================================
+     Persistence Detection
+     ============================================================ -->
+<group name="persistence,">
+
+  <!-- Rule 100005: New local user account created -->
+  <rule id="100005" level="10">
+    <if_sid>5901</if_sid>
+    <description>Persistence: New user account created on system</description>
+    <mitre>
+      <id>T1136.001</id>
+    </mitre>
+    <group>persistence,account_creation,</group>
+  </rule>
+
+</group>
+
+<!-- ============================================================
+     File Integrity Monitoring — Critical Paths
+     ============================================================ -->
+<group name="fim_critical,">
+
+  <!-- Rule 100006: /etc/shadow modified → credential access -->
+  <rule id="100006" level="12">
+    <if_sid>550,554</if_sid>
+    <field name="file">/etc/shadow</field>
+    <description>CRITICAL: /etc/shadow modified — possible credential dumping (T1003.008)</description>
+    <mitre>
+      <id>T1003.008</id>
+    </mitre>
+    <group>fim_critical,</group>
+  </rule>
+
+  <!-- Rule 100007: /etc/passwd modified → account manipulation -->
+  <rule id="100007" level="10">
+    <if_sid>550,554</if_sid>
+    <field name="file">/etc/passwd</field>
+    <description>WARNING: /etc/passwd modified — possible account manipulation (T1136.001)</description>
+    <mitre>
+      <id>T1136.001</id>
+    </mitre>
+    <group>fim_critical,</group>
+  </rule>
+
+</group>
